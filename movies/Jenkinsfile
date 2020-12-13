@@ -6,7 +6,6 @@ pipeline {
     agent {
       node {
         label 'maven'
-        //TODO: Add label for the Maven jenkins agent
       }
     }
 
@@ -82,16 +81,21 @@ pipeline {
                       }
                     }
                 }
+
+		sh '''
                 // TODO: Create a new OpenShift application based on the ${APP_NAME}:latest image stream
                 oc new-app --as-deployment-config ${APP_NAME}:latest -n ${DEV_PROJECT}
                 // TODO: Expose the ${APP_NAME} service for external access
                 oc expose svc/${APP_NAME} -n ${DEV_PROJECT}
+                '''
             }
         }
 
         stage('Wait for deployment in DEV env') {
             //TODO: Watch deployment until pod is in 'Running' state
+            sh '''
             oc rollout status dc/${APP_NAME} -n ${DEV_PROJECT}
+            '''
         }
 
         stage('Promote to Staging Env') {
